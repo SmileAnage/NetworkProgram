@@ -1,33 +1,35 @@
 """
-    ＴＣＰ服务端
+TCP服务端
+接收客户端消息并反馈
 """
 from socket import *
 
-# 创建套接字
-s = socket()
+socket_s = socket()  # 创建套接字
 
-# 绑定地址及端口
-s.bind(("176.136.7.22", 7777))
+socket_s.bind(("0.0.0.0", 7776))  # 绑定地址及端口
 
-# 设置监听(参数无所谓)
-s.listen(7)
+socket_s.listen(7)  # 设置监听(参数无所谓)
 
-# 等待处理客户端连接请求
-print("Waiting for connect...")
-connfd, addr = s.accept()
-print("Connect from", addr)
-
-# 接收的东西根据格式改命名
-fw = open("get.jpg", "wb")
-
-# 接收消息
 while True:
-    data = connfd.recv(1024)
-    if not data:
+    # 阻塞等待处理连接
+    print("Waitting for Connect...")
+    try:
+        connect, addr = socket_s.accept()
+        print("Connect from ", addr)
+    except KeyboardInterrupt:
+        print("Server exit")
         break
-    # 将接收的消息写入文件
-    fw.write(data)
+    except Exception as e:
+        print(e)
+        continue
 
-# 关闭套接字及文件
-fw.close()
-s.close()
+    while True:
+        # 接收消息
+        data = connect.recv(1024)
+        if not data:
+            break
+        print("收到：", data.decode())
+        connect.send(b'OK')
+    connect.close()
+
+socket_s.close()
